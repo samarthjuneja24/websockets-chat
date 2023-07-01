@@ -43,7 +43,8 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 			continue
 		}
 		if messageData.Receiver == "all" {
-			s.broadcastMessage(messageData.Message)
+			senderNumber := s.connections[ws]
+			s.broadcastMessage(messageData.Message, senderNumber)
 		} else {
 			for client, number := range s.connections {
 				if number == messageData.Receiver {
@@ -54,13 +55,15 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 	}
 }
 
-func (s *Server) broadcastMessage(message string) {
+func (s *Server) broadcastMessage(message string, senderNumber string) {
 	for ws := range s.connections {
-		go func(ws *websocket.Conn) {
-			if _, err := ws.Write([]byte(message)); err != nil {
-				fmt.Println("Write error: ", err)
-			}
-		}(ws)
+		if s.connections[ws] != senderNumber {
+			go func(ws *websocket.Conn) {
+				if _, err := ws.Write([]byte(message)); err != nil {
+					fmt.Println("Write error: ", err)
+				}
+			}(ws)
+		}
 	}
 }
 
