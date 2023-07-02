@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
+	"os"
 )
 
 type Server struct {
@@ -95,9 +95,13 @@ func (s *Server) pingPong(conn *websocket.Conn) {
 func main() {
 	server := NewServer()
 	http.Handle("/ws", websocket.Handler(server.handleWS))
-	err := http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Println("Error while creating server: ", err)
 	}
-	log.Println("Server is up on port 8080")
+	log.Println("Server is up on port " + port)
 }
