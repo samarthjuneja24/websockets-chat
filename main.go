@@ -23,7 +23,7 @@ func NewServer() *Server {
 func (s *Server) handleWS(ws *websocket.Conn) {
 	fmt.Println("New incoming connection from client: ", ws.RemoteAddr())
 	s.connections[ws] = ws.Request().FormValue("number")
-	s.pingPong(ws)
+	go s.pingPong(ws)
 	s.readLoop(ws)
 }
 
