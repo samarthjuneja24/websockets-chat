@@ -23,7 +23,7 @@ func NewServer() *Server {
 func (s *Server) handleWS(ws *websocket.Conn) {
 	fmt.Println("New incoming connection from client: ", ws.RemoteAddr())
 	s.connections[ws] = ws.Request().FormValue("number")
-	s.pingPong(ws)
+	go s.pingPong(ws)
 	s.readLoop(ws)
 }
 
@@ -103,6 +103,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	println(port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Println("Error while creating server: ", err)
