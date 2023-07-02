@@ -53,6 +53,7 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 			fmt.Println("Sending to individual user:", messageData.Receiver)
 			for client, number := range s.connections {
 				if number == messageData.Receiver {
+					fmt.Println("Sending message to this client:", messageData.Receiver)
 					s.sendMessageToSpecificClient(messageData.Message, client)
 				}
 			}
