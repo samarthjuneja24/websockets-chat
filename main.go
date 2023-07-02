@@ -103,7 +103,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	println(port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Println("Error while creating server: ", err)
