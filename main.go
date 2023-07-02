@@ -20,9 +20,9 @@ func NewServer() *Server {
 }
 
 func (s *Server) handleWS(ws *websocket.Conn) {
-	println(ws.Request().FormValue("number"))
 	fmt.Println("New incoming connection from client: ", ws.RemoteAddr())
 	s.connections[ws] = ws.Request().FormValue("number")
+	s.pingPong(ws)
 	s.readLoop(ws)
 }
 
@@ -38,6 +38,7 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 		if err != nil {
 			//If connection from client breaks itself
 			if err == io.EOF {
+				delete(s.connections, ws)
 				break
 			}
 			fmt.Println("Read error: ", err)
@@ -72,6 +73,22 @@ func (s *Server) sendMessageToSpecificClient(message string, receiver *websocket
 	_, err := receiver.Write([]byte(message))
 	if err != nil {
 		fmt.Println("Error sending data to: "+receiver.LocalAddr().String(), err)
+	}
+}
+
+func (s *Server) pingPong(conn *websocket.Conn) {
+	pingInterval := time.Second * 5
+	ticker := time.NewTicker(pingInterval)
+	defer ticker.Stop()
+	for range ticker.C {
+		err := websocket.Message.Send(conn, "ping")
+		if err != nil {
+			log.Println("Error while ping-pong to client: ", err)
+			delete(s.connections, conn)
+			break
+		} else {
+			log.Println("Connection successful for client:", conn.LocalAddr().String())
+		}
 	}
 }
 
