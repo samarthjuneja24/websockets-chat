@@ -46,9 +46,11 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 			continue
 		}
 		if messageData.Receiver == "all" {
+			fmt.Println("Broadcasting to all users")
 			senderNumber := s.connections[ws]
 			s.broadcastMessage(messageData.Message, senderNumber)
 		} else {
+			fmt.Println("Sending to individual user:", messageData.Receiver)
 			for client, number := range s.connections {
 				if number == messageData.Receiver {
 					s.sendMessageToSpecificClient(messageData.Message, client)
@@ -78,7 +80,7 @@ func (s *Server) sendMessageToSpecificClient(message string, receiver *websocket
 }
 
 func (s *Server) pingPong(conn *websocket.Conn) {
-	pingInterval := time.Second * 5
+	pingInterval := time.Second * 60
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
 	for range ticker.C {
